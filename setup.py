@@ -14,6 +14,10 @@ setup(name='tap-braintree',
           'requests==2.20.0',
           'braintree==3.53.0',
       ],
+      entry_points="""
+    [console_scripts]
+    tap-braintree=tap-braintree:main
+    """,
       extras_require={
           'dev': [
               'pylint',
@@ -21,15 +25,10 @@ setup(name='tap-braintree',
               'nose',
           ]
       },
-      entry_points='''
-          [console_scripts]
-          tap-braintree=tap_braintree:main
-      ''',
       packages=['tap_braintree'],
-      package_data = {
-          'tap_braintree/schemas': [
-              'transactions.json',
-          ],
+      package_data={
+          "schemas": ["tap_braintree/schemas/*.json"],
+          "definitions": ["tap_braintree/definitions/*.json"]
       },
       include_package_data=True,
-)
+      )
