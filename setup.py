@@ -25,12 +25,7 @@ setup(name='tap-braintree',
       ''',
       packages=['tap_braintree', 'tap_braintree.streams'],
       package_data={
-          'tap_braintree/schemas': [
-              'transactions.json',
-          ],
-          'tap_braintree/definitions': [
-              'definitions.json',
-          ],
+          '': ['*.json']
       },
       include_package_data=True,
       )
