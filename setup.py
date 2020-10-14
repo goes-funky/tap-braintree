@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 from setuptools import setup
 
 setup(name='tap-braintree',
@@ -14,10 +12,6 @@ setup(name='tap-braintree',
           'requests==2.20.0',
           'braintree==3.53.0',
       ],
-      entry_points="""
-    [console_scripts]
-    tap-braintree=tap_braintree:main
-    """,
       extras_require={
           'dev': [
               'pylint',
@@ -25,10 +19,15 @@ setup(name='tap-braintree',
               'nose',
           ]
       },
-      packages=['tap_braintree'],
+      entry_points='''
+          [console_scripts]
+          tap-braintree=tap_braintree:main
+      ''',
+      packages=['tap_braintree', 'tap_braintree.streams'],
       package_data={
-          "schemas": ["tap_braintree/schemas/*.json"],
-          "definitions": ["tap_braintree/definitions/*.json"]
+          'tap_braintree/schemas': [
+              'transactions.json',
+          ],
       },
       include_package_data=True,
       )
