@@ -28,6 +28,9 @@ setup(name='tap-braintree',
           'tap_braintree/schemas': [
               'transactions.json',
           ],
+          'tap_braintree/definitions': [
+              'definitions.json',
+          ],
       },
       include_package_data=True,
       )
