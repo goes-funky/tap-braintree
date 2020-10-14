@@ -16,7 +16,7 @@ setup(name='tap-braintree',
       ],
       entry_points="""
     [console_scripts]
-    tap-braintree=tap-braintree:main
+    tap-braintree=tap_braintree:main
     """,
       extras_require={
           'dev': [
