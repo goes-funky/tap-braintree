@@ -16,7 +16,7 @@ import tap_braintree.streams  # Load stream objects into Context
 
 CONFIG = {}
 STATE = {}
-TRAILING_DAYS = timedelta(days=30)
+TRAILING_DAYS = timedelta(days=1)
 DEFAULT_TIMESTAMP = "1970-01-01T00:00:00Z"
 
 logger = singer.get_logger()
@@ -273,6 +273,12 @@ def do_sync():
     logger.info("Sync completed")
 
 
+def check_auth():
+    time_extracted = utils.now()
+    braintree.Transaction.search(
+        braintree.TransactionSearch.created_at.between(time_extracted, time_extracted))
+
+
 @utils.handle_top_exception(logger)
 def main():
     args = utils.parse_args(
@@ -292,8 +298,14 @@ def main():
         STATE.update(args.state)
 
     if args.discover:
-        catalog = discover()
-        print(json.dumps(catalog, indent=2))
+        try:
+            check_auth()
+            catalog = discover()
+            print(json.dumps(catalog, indent=2))
+        except braintree.exceptions.authentication_error.AuthenticationError:
+            logger.critical('Authentication error occured. '
+                            'Please check your merchant_id, public_key, and '
+                            'private_key for errors', exc_info=True)
     else:
         try:
             do_sync()
