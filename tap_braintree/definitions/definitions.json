@@ -89,6 +89,9 @@
                 },
                 "card_type": {
                     "type": ["null", "string"]
+                },
+                "country_of_issuance:": {
+                    "type": ["null", "string"]
                 }
             }
         },
@@ -195,6 +198,7 @@
         }
     }
 }
+
 ,
   "disputes": {
     "type": "object",
