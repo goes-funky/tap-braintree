@@ -63,6 +63,12 @@
         "subscription_id": {
             "type": ["null", "string"]
         },
+        "billing_country_name": {
+            "type": ["null", "string"]
+        },
+        "shipping_country_name": {
+            "type": ["null", "string"]
+        },
         "customer_details": {
             "type": "object",
             "properties": {

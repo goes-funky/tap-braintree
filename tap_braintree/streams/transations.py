@@ -4,9 +4,14 @@ from tap_braintree.context import Context
 from tap_braintree.streams.base import Stream
 
 
-class Transactions(Stream):
+class TransactionsStream(Stream):
     name = 'transactions'
-    replication_object = braintree.Transaction
+
+    @staticmethod
+    def stream_data(start, end):
+        data = braintree.Transaction.search(
+            braintree.TransactionSearch.created_at.between(start, end))
+        return data
 
 
-Context.stream_objects['transactions'] = Transactions
+Context.stream_objects['transactions'] = TransactionsStream
