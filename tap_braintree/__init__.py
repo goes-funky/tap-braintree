@@ -28,7 +28,7 @@ STREAM_SDK_OBJECTS = {
         streams.disputes.DisputesStream
 }
 
-DAYS_WINDOW = 4
+DAYS_WINDOW = 2
 
 
 def load_schemas():
