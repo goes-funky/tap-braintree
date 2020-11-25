@@ -172,9 +172,12 @@ def sync_stream(stream):
 
     latest_start_date = utils.strptime_to_utc(get_start(stream))
 
-    period_start = latest_start_date - TRAILING_DAYS
+    period_start = latest_start_date
 
-    period_end = utils.now()
+    period_end = period_start + timedelta(days=10)
+    now = utils.now()
+    if period_end > now:
+        period_end = now
 
     logger.info(stream + ": Syncing from {}".format(period_start))
 
@@ -250,7 +253,8 @@ def sync_stream(stream):
 
     STATE['latest_disbursement_date'] = utils.strftime(
         latest_disbursement_date)
-    STATE["datos_continue_import"] = period_end + timedelta(days=30) < utils.now()
+
+    STATE["datos_continue_import"] = period_end < now
 
     utils.update_state(STATE, stream, utils.strftime(end))
 
