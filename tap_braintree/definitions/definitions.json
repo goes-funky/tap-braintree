@@ -198,74 +198,142 @@
         }
     }
 }
-
 ,
   "disputes": {
-    "type": "object",
-    "properties": {
-      "id": {
-        "type": "string"
-      },
-      "created_at": {
-        "type": "string",
-        "format": "date-time"
-      },
-      "updated_at": {
-        "type": "string",
-        "format": "date-time"
-      },
-      "received_date": {
-        "type": "string",
-        "format": "date-time"
-      },
-      "amount_disputed": {
-        "type": [
-          "null",
-          "number"
-        ]
-      },
-      "amount_won": {
-        "type": [
-          "null",
-          "number"
-        ]
-      },
-      "case_number": {
-        "type": [
-          "null",
-          "string"
-        ]
-      },
-      "customer_id": {
-        "type": [
-          "null",
-          "string"
-        ]
-      },
-      "kind": {
-        "type": [
-          "null",
-          "string"
-        ]
-      },
-      "settlement_batch_id": {
-        "type": [
-          "null",
-          "string"
-        ]
-      },
-      "status": {
-        "type": [
-          "null",
-          "string"
-        ]
-      },
-      "transaction_id": {
-        "type": [
-          "null",
-          "string"
-        ]
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "received_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "disbursement_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "amount_disputed": {
+      "type": [
+        "null",
+        "number"
+      ]
+    },
+    "reason": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "reason_code": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "reason_description": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "amount_won": {
+      "type": [
+        "null",
+        "number"
+      ]
+    },
+    "case_number": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "customer_id": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "kind": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "original_dispute_id": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "settlement_batch_id": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "status": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "reference_number": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "transaction": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "order_id": {
+          "type": [
+            "null",
+            "string"
+          ]
+        }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "properties": {
+        "comment": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "url": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "id": {
+          "type": [
+            "null",
+            "string"
+          ]
+        }
       }
     }
   }
+}
+
 }
