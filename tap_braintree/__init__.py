@@ -250,6 +250,7 @@ def sync_stream(stream):
 
     STATE['latest_disbursement_date'] = utils.strftime(
         latest_disbursement_date)
+    STATE["datos_continue_import"] = period_end + timedelta(days=30) < utils.now()
 
     utils.update_state(STATE, stream, utils.strftime(end))
 
