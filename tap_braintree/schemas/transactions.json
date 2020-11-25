@@ -63,12 +63,6 @@
         "subscription_id": {
             "type": ["null", "string"]
         },
-        "billing_country_name": {
-            "type": ["null", "string"]
-        },
-        "shipping_country_name": {
-            "type": ["null", "string"]
-        },
         "customer_details": {
             "type": "object",
             "properties": {
@@ -89,7 +83,22 @@
                 "card_type": {
                     "type": ["null", "string"]
                 },
-                "country_of_issuance:": {
+                "country_of_issuance": {
+                    "type": ["null", "string"]
+                },
+                "payroll": {
+                    "type": ["null", "string"]
+                },
+                "cardholder_name": {
+                    "type": ["null", "string"]
+                },
+                "expiration_month": {
+                    "type": ["null", "string"]
+                },
+                "expiration_year": {
+                    "type": ["null", "string"]
+                },
+                "issuing_bank": {
                     "type": ["null", "string"]
                 }
             }
