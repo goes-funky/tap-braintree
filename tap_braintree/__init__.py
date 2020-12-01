@@ -30,6 +30,9 @@ STREAM_SDK_OBJECTS = {
 
 DAYS_WINDOW = 2
 
+CONTINUOUS_IMPORT_WINDOW = timedelta(days=120)
+ENABLE_CONTINUOUS_IMPORT = True
+
 
 def load_schemas():
     schemas = {}
@@ -118,7 +121,7 @@ def to_utc(dt):
     return dt.replace(tzinfo=pytz.UTC)
 
 
-def daterange(start_date, end_date, skip_day=False):
+def daterange(start_date, final_end_date, skip_day=False):
     """
     Generator function that produces an iterable list of days between the two
     dates start_date and end_date as a tuple pair of datetimes.
@@ -129,7 +132,7 @@ def daterange(start_date, end_date, skip_day=False):
 
     Args:
         start_date (datetime): start of period
-        end_date (datetime): end of period
+        final_end_date (datetime): end of period
         skip_day (bool): skip days if the dates are not datetime
 
     Yields:
@@ -147,16 +150,20 @@ def daterange(start_date, end_date, skip_day=False):
         )
     )
 
-    end_date = to_utc(end_date + timedelta(1))
-    days_total = int(math.floor((end_date - start_date).days / DAYS_WINDOW))
-    days_skip = 0
+    final_end_date = to_utc(final_end_date + timedelta(1))
 
-    if skip_day:
-        days_skip = 1
+    new_start_date, new_end_date = get_date_tuple(start_date, skip_day, True)
 
-    for n in range(days_total):
-        n = n * DAYS_WINDOW
-        yield start_date + timedelta(n + days_skip), start_date + timedelta(n + DAYS_WINDOW)
+    while new_end_date.date() < final_end_date.date():
+        yield new_start_date, new_end_date
+        new_start_date, new_end_date = get_date_tuple(new_end_date, skip_day, False)
+
+
+def get_date_tuple(start_date, skip_day, first_day):
+    if not first_day and skip_day:
+        start_date = start_date + timedelta(1)
+    new_end_date = start_date + timedelta(DAYS_WINDOW)
+    return start_date, new_end_date
 
 
 def sync_stream(stream):
@@ -174,9 +181,10 @@ def sync_stream(stream):
 
     period_start = latest_start_date
 
-    period_end = period_start + timedelta(days=10)
+    period_end = period_start + CONTINUOUS_IMPORT_WINDOW
     now = utils.now()
-    if period_end > now:
+
+    if period_end > now or not ENABLE_CONTINUOUS_IMPORT:
         period_end = now
 
     logger.info(stream + ": Syncing from {}".format(period_start))
@@ -192,7 +200,8 @@ def sync_stream(stream):
 
     end = period_end
     # increment through each day (20k results max from api)
-    for start, end in daterange(period_start, period_end, skip_day=sdk_obj.convert_to_datetime):
+    skip_day = sdk_obj.convert_to_datetime
+    for start, end in daterange(period_start, period_end, skip_day=skip_day):
 
         end = min(end, period_end)
         if stream not in STREAM_SDK_OBJECTS:
@@ -254,11 +263,18 @@ def sync_stream(stream):
     STATE['latest_disbursement_date'] = utils.strftime(
         latest_disbursement_date)
 
-    STATE["datos_continue_import"] = period_end < now
+    STATE["datos_continue_import"] = period_end < now and ENABLE_CONTINUOUS_IMPORT
 
+    end = get_final_end_date(skip_day, end)
     utils.update_state(STATE, stream, utils.strftime(end))
 
     singer.write_state(STATE)
+
+
+def get_final_end_date(skip_day, end_date):
+    if skip_day:
+        return end_date + timedelta(1)
+    return end_date
 
 
 def do_sync():
