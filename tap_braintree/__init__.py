@@ -160,15 +160,14 @@ def daterange(start_date, final_end_date, skip_day=False):
 
 
 def get_date_tuple(start_date, skip_day, first_day):
-
     if not first_day and skip_day:
         start_date = start_date + timedelta(1)
     else:
         # so we don't get duplicates if its a datetime
-        start_date = start_date + timedelta(minutes=1)
+        start_date = start_date
 
     new_end_date = start_date + timedelta(DAYS_WINDOW)
-    return start_date, new_end_date
+    return start_date + timedelta(minutes=1), new_end_date
 
 
 def sync_stream(stream):
