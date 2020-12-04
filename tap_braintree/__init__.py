@@ -28,7 +28,7 @@ STREAM_SDK_OBJECTS = {
         streams.disputes.DisputesStream
 }
 
-DAYS_WINDOW = 2
+DAYS_WINDOW = 1
 
 CONTINUOUS_IMPORT_WINDOW = timedelta(days=120)
 ENABLE_CONTINUOUS_IMPORT = False
