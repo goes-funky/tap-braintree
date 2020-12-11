@@ -30,9 +30,6 @@ STREAM_SDK_OBJECTS = {
 
 DAYS_WINDOW = 1
 
-CONTINUOUS_IMPORT_WINDOW = timedelta(days=120)
-ENABLE_CONTINUOUS_IMPORT = False
-
 
 def load_schemas():
     schemas = {}
@@ -185,10 +182,10 @@ def sync_stream(stream):
 
     period_start = latest_start_date
 
-    period_end = period_start + CONTINUOUS_IMPORT_WINDOW
+    period_end = period_start + CONFIG['continuous_import_window']
     now = utils.now()
 
-    if period_end > now or not ENABLE_CONTINUOUS_IMPORT:
+    if period_end > now or not CONFIG['enable_continuous_import']:
         period_end = now
 
     logger.info(stream + ": Syncing from {}".format(period_start))
@@ -267,7 +264,7 @@ def sync_stream(stream):
     STATE['latest_disbursement_date'] = utils.strftime(
         latest_disbursement_date)
 
-    STATE["datos_continue_import"] = period_end < now and ENABLE_CONTINUOUS_IMPORT
+    STATE["datos_continue_import"] = period_end < now and CONFIG['enable_continuous_import']
 
     end = get_final_end_date(skip_day, end)
     utils.update_state(STATE, stream, utils.strftime(end))
@@ -318,6 +315,8 @@ def main():
     )
 
     CONFIG['start_date'] = config.pop('start_date')
+    CONFIG['enable_continuous_import'] = config.pop("enable_continuous_import", False)
+    CONFIG['continuous_import_window'] = timedelta(days=config.pop("continuous_import_window", 120))
 
     braintree.Configuration.configure(environment, **config)
 
