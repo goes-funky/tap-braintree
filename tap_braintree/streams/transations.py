@@ -11,6 +11,8 @@ class TransactionsStream(Stream):
     def stream_data(start, end):
         data = braintree.Transaction.search(
             braintree.TransactionSearch.created_at.between(start, end))
+        if len(data.ids) == 50000:
+            raise Exception("Got more than 50000 transactions")
         return data
 
 
