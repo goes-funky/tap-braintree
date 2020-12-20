@@ -343,6 +343,11 @@ def main():
             logger.critical('Authentication error occured. '
                             'Please check your merchant_id, public_key, and '
                             'private_key for errors', exc_info=True)
+        except Exception as ex:
+            singer.write_state({
+                'stop_importing': True
+            })
+            raise ex
 
 
 if __name__ == '__main__':
