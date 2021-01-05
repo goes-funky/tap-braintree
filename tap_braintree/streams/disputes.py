@@ -7,7 +7,7 @@ from tap_braintree.streams.base import Stream
 class DisputesStream(Stream):
     name = 'disputes'
     replication_key = 'received_date'
-    convert_to_datetime = True
+    datetime_insensitive = True
 
     @staticmethod
     def stream_data(start, end):
