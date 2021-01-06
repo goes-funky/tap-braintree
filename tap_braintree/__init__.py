@@ -118,7 +118,7 @@ def to_utc(dt):
     return dt.replace(tzinfo=pytz.UTC)
 
 
-def daterange(start_date, final_end_date, skip_day=False):
+def daterange(start_date, final_end_date, use_dates=False):
     """
     Generator function that produces an iterable list of days between the two
     dates start_date and end_date as a tuple pair of datetimes.
@@ -130,7 +130,7 @@ def daterange(start_date, final_end_date, skip_day=False):
     Args:
         start_date (datetime): start of period
         final_end_date (datetime): end of period
-        skip_day (bool): skip days if the dates are not datetime
+        use_dates (bool): use dates instead of datetime
 
     Yields:
         tuple: daily period
@@ -139,17 +139,14 @@ def daterange(start_date, final_end_date, skip_day=False):
 
     """
 
-    final_end_date = to_utc(final_end_date)
-
     while start_date < final_end_date:
-        new_start_date, new_end_date = get_date_tuple(start_date)
-        yield new_start_date, new_end_date
-
-        start_date = new_end_date
-
-        #skip day for tables that are not datetime sensitive
-        if skip_day:
+        if use_dates:
+            yield start_date, start_date
             start_date += timedelta(days=1)
+        else:
+            new_start_date, new_end_date = get_date_tuple(start_date)
+            yield new_start_date, new_end_date
+            start_date = new_end_date
 
 
 def get_date_tuple(start_date):
@@ -159,6 +156,12 @@ def get_date_tuple(start_date):
 
 def sync_stream(stream):
     schema = load_schema(stream)
+
+    sdk_obj = STREAM_SDK_OBJECTS[stream]
+
+    # this is for checking if table is datetime sensitive or not
+    # if not then we skip one day
+    use_dates = sdk_obj.datetime_insensitive
 
     latest_updated_at = utils.strptime_to_utc(STATE.get('latest_updated_at', DEFAULT_TIMESTAMP))
 
@@ -175,6 +178,12 @@ def sync_stream(stream):
     period_end = period_start + CONFIG['continuous_import_window']
     now = utils.now()
 
+    # convert to dates
+    if use_dates:
+        period_end = period_end.date()
+        period_start = period_start.date()
+        now = now.date()
+
     if period_end > now or not CONFIG['enable_continuous_import']:
         period_end = now
 
@@ -187,17 +196,13 @@ def sync_stream(stream):
     logger.info(stream + ": latest_start_date from {}".format(
         latest_start_date
     ))
-    sdk_obj = STREAM_SDK_OBJECTS[stream]
 
     end = period_end
 
-    # this is for checking if table is datetime sensitive or not
-    # if not then we skip one day
-    skip_day = sdk_obj.datetime_insensitive
-
-    for start, end in daterange(period_start, period_end, skip_day=skip_day):
+    for start, end in daterange(period_start, period_end, use_dates=use_dates):
 
         end = min(end, period_end)
+
         if stream not in STREAM_SDK_OBJECTS:
             logger.error(stream + " is not a defined stream"
                          )
@@ -259,16 +264,28 @@ def sync_stream(stream):
 
     STATE["datos_continue_import"] = period_end < now and CONFIG['enable_continuous_import']
 
-    end = get_final_end_date(skip_day, end)
+    end = get_final_end_date(use_dates, end)
     utils.update_state(STATE, stream, utils.strftime(end))
 
     singer.write_state(STATE)
 
 
-def get_final_end_date(skip_day, end_date):
-    if skip_day:
-        # for disputes
-        return end_date + timedelta(1)
+def get_final_end_date(use_dates, end_date):
+    if use_dates:
+
+        if end_date < utils.now().date():
+
+            #adding one day if we are not using datetime
+            end_date += timedelta(days=1)
+
+        end_date = to_utc(
+            datetime.combine(
+                end_date,
+                datetime.min.time()  # set to the 0:00 on the day of the start date
+            )
+        )
+        return end_date
+
     return end_date
 
 
