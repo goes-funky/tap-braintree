@@ -139,30 +139,20 @@ def daterange(start_date, final_end_date, skip_day=False):
 
     """
 
-    # set to start of day
-    start_date = to_utc(
-        datetime.combine(
-            start_date.date(),
-            datetime.min.time()  # set to the 0:00 on the day of the start date
-        )
-    )
+    final_end_date = to_utc(final_end_date)
 
-    final_end_date = to_utc(final_end_date + timedelta(1))
-
-    new_start_date, new_end_date = get_date_tuple(start_date, skip_day, True)
-
-    while new_end_date.date() < final_end_date.date():
+    while start_date < final_end_date:
+        new_start_date, new_end_date = get_date_tuple(start_date)
         yield new_start_date, new_end_date
-        new_start_date, new_end_date = get_date_tuple(new_end_date, skip_day, False)
+
+        start_date = new_end_date
+
+        #skip day for tables that are not datetime sensitive
+        if skip_day:
+            start_date += timedelta(days=1)
 
 
-def get_date_tuple(start_date, skip_day, first_day):
-    if not first_day and skip_day:
-        start_date = start_date + timedelta(1)
-    else:
-        # so we don't get duplicates if its a datetime
-        start_date = start_date
-
+def get_date_tuple(start_date):
     new_end_date = start_date + timedelta(DAYS_WINDOW)
     return start_date + timedelta(minutes=1), new_end_date
 
@@ -200,8 +190,11 @@ def sync_stream(stream):
     sdk_obj = STREAM_SDK_OBJECTS[stream]
 
     end = period_end
-    # increment through each day (20k results max from api)
-    skip_day = sdk_obj.convert_to_datetime
+
+    # this is for checking if table is datetime sensitive or not
+    # if not then we skip one day
+    skip_day = sdk_obj.datetime_insensitive
+
     for start, end in daterange(period_start, period_end, skip_day=skip_day):
 
         end = min(end, period_end)
@@ -223,7 +216,7 @@ def sync_stream(stream):
             transformed = transform_row(row, schema)
 
             updated_at = getattr(row, sdk_obj.replication_key)
-            if sdk_obj.convert_to_datetime:
+            if sdk_obj.datetime_insensitive:
                 updated_at = datetime.combine(updated_at, datetime.min.time())
             updated_at = to_utc(updated_at)
 
@@ -274,6 +267,7 @@ def sync_stream(stream):
 
 def get_final_end_date(skip_day, end_date):
     if skip_day:
+        # for disputes
         return end_date + timedelta(1)
     return end_date
 

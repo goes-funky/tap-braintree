@@ -53,7 +53,7 @@ class Stream:
     replication_method = 'INCREMENTAL'
     replication_key = 'updated_at'
     key_properties = ['id']
-    convert_to_datetime = False
+    datetime_insensitive = False
 
     # Controls which SDK object we use to call the API by default.
 
